@@ -339,7 +339,7 @@ const serviceLinks = [
                gap-2 text-xs font-medium text-slate-500"
       >
         <div>
-          © {{ currentYear }} RoomBook
+          © {{ currentYear }} Resven
         </div>
 
         <div>

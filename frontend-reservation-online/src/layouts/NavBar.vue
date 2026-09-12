@@ -46,7 +46,7 @@ watch(() => route.path, () => {
           class="font-bricolage text-[22px] sm:text-[24px] font-black tracking-[-1.5px] text-black flex-shrink-0"
           @click="closeMenu"
         >
-          Lodgify
+        Resven
         </RouterLink>
 
         <!-- Navigation desktop -->

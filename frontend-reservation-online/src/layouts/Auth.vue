@@ -4,7 +4,7 @@
     <header class="absolute left-4 top-6 z-10">
       <RouterLink to="/">
         <div class="text-[27px] font-black tracking-[-1.8px] text-black">
-          Lodgify
+          Resven
         </div>
       </RouterLink>
     </header>

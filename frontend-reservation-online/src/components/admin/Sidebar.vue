@@ -65,7 +65,7 @@ const router = useRouter()
                 </div>
 
                 <span class="font-bricolage text-[22px] font-bold tracking-[-0.5px] text-[#0F172A]">
-                    Reserv'N
+                  Resven
                 </span>
             </div>
 
