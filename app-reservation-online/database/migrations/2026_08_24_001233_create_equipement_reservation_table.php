@@ -18,10 +18,11 @@ return new class extends Migration {
 
             $table->unsignedInteger('quantity');
 
-            $table->unique([
+            $table->primary([
                 'reservation_id',
                 'equipement_id'
             ]);
+
 
             $table->timestamps();
         });
