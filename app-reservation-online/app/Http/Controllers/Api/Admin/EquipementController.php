@@ -11,11 +11,16 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class EquipementController extends Controller
 {
+    public function __construct(
+        protected CloudinaryService $cloudinaryService
+    ) {}
+
     /**
      * Liste tous les équipements avec filtres et pagination.
      */
@@ -80,9 +85,9 @@ class EquipementController extends Controller
         try {
             $imagePath = null;
 
-            // Upload de l'image si fournie
+            // Upload de l'image via Cloudinary (ou fallback local) si fournie
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('images/equipements', 'public');
+                $imagePath = $this->cloudinaryService->upload($request->file('image'), 'equipements');
             }
 
             $equipement = Equipement::create([
@@ -103,8 +108,8 @@ class EquipementController extends Controller
             DB::rollBack();
 
             // Supprimer le fichier uploadé en cas d'erreur
-            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
+            if (!empty($imagePath)) {
+                $this->cloudinaryService->delete($imagePath);
             }
 
             return response()->json([
@@ -161,9 +166,9 @@ class EquipementController extends Controller
 
         DB::beginTransaction();
         try {
-            // Upload nouvelle image si envoyée
+            // Upload nouvelle image via Cloudinary si envoyée
             if ($request->hasFile('image')) {
-                $newImage = $request->file('image')->store('images/equipements', 'public');
+                $newImage = $this->cloudinaryService->upload($request->file('image'), 'equipements');
                 $equipement->image = $newImage;
             }
 
@@ -188,8 +193,8 @@ class EquipementController extends Controller
             DB::commit();
 
             // Supprimer l'ancienne image si remplacée
-            if ($newImage && $oldImage && $newImage !== $oldImage && Storage::disk('public')->exists($oldImage)) {
-                Storage::disk('public')->delete($oldImage);
+            if ($newImage && $oldImage && $newImage !== $oldImage) {
+                $this->cloudinaryService->delete($oldImage);
             }
 
             return response()->json([
@@ -200,8 +205,8 @@ class EquipementController extends Controller
             DB::rollBack();
 
             // Supprimer la nouvelle image si l'opération a échoué
-            if ($newImage && Storage::disk('public')->exists($newImage)) {
-                Storage::disk('public')->delete($newImage);
+            if (!empty($newImage)) {
+                $this->cloudinaryService->delete($newImage);
             }
 
             return response()->json([
@@ -226,7 +231,12 @@ class EquipementController extends Controller
                 ], 404);
             }
 
+            $oldImage = $equipement->image;
             $equipement->delete();
+
+            if (!empty($oldImage)) {
+                $this->cloudinaryService->delete($oldImage);
+            }
 
             return response()->json([
                 'message' => 'Équipement supprimé avec succès.',

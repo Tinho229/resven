@@ -12,11 +12,16 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ImageController extends Controller
 {
+    public function __construct(
+        protected CloudinaryService $cloudinaryService
+    ) {}
+
     /**
      * Liste toutes les images avec filtres (recherche, salle) et pagination.
      */
@@ -109,10 +114,9 @@ class ImageController extends Controller
         try {
             $path = $validated['path'] ?? null;
 
-            // Gestion de l'upload du fichier physique
+            // Gestion de l'upload de l'image via Cloudinary (ou stockage local si non configuré)
             if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $path = $file->store('images/salles', 'public');
+                $path = $this->cloudinaryService->upload($request->file('image'), 'salles');
             }
 
             $image = Image::create([
@@ -132,8 +136,8 @@ class ImageController extends Controller
             DB::rollBack();
 
             // Supprimer le fichier uploadé en cas d'échec SQL
-            if (isset($path) && Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
+            if (!empty($path)) {
+                $this->cloudinaryService->delete($path);
             }
 
             return response()->json([
@@ -192,7 +196,7 @@ class ImageController extends Controller
         try {
             // Remplacement du fichier si une nouvelle image est uploadée
             if ($request->hasFile('image')) {
-                $newPath = $request->file('image')->store('images/salles', 'public');
+                $newPath = $this->cloudinaryService->upload($request->file('image'), 'salles');
                 $image->path = $newPath;
             } elseif (array_key_exists('path', $validated) && !empty($validated['path'])) {
                 $image->path = $validated['path'];
@@ -214,9 +218,9 @@ class ImageController extends Controller
 
             DB::commit();
 
-            // Si un nouveau fichier a été uploadé avec succès et que l'ancien était stocké localement, supprimer l'ancien
-            if ($newPath && $oldPath && $newPath !== $oldPath && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            // Si un nouveau fichier a été uploadé avec succès et que l'ancien était différent, supprimer l'ancien
+            if ($newPath && $oldPath && $newPath !== $oldPath) {
+                $this->cloudinaryService->delete($oldPath);
             }
 
             return response()->json([
@@ -227,8 +231,8 @@ class ImageController extends Controller
             DB::rollBack();
 
             // Supprimer le nouveau fichier uploadé en cas d'erreur
-            if ($newPath && Storage::disk('public')->exists($newPath)) {
-                Storage::disk('public')->delete($newPath);
+            if ($newPath) {
+                $this->cloudinaryService->delete($newPath);
             }
 
             return response()->json([
@@ -253,7 +257,12 @@ class ImageController extends Controller
                 ], 404);
             }
 
+            $oldPath = $image->path;
             $image->delete();
+
+            if (!empty($oldPath)) {
+                $this->cloudinaryService->delete($oldPath);
+            }
 
             return response()->json([
                 'message' => 'Image supprimée avec succès.',
