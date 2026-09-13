@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Soap\Url;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Url::forceScheme('https');
+        URL::forceScheme('https');
     }
 }
