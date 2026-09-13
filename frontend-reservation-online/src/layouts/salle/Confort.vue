@@ -49,6 +49,12 @@ let interval = null
 */
 
 onMounted(() => {
+    // Préchargement en arrière-plan des images de la section Confort
+    rooms.forEach((r) => {
+        const img = new Image()
+        img.src = r.image
+    })
+
     interval = setInterval(() => {
         activeRoom.value =
             (activeRoom.value + 1) % rooms.length
@@ -100,6 +106,7 @@ onBeforeUnmount(() => {
                         :key="activeRoom"
                         :src="rooms[activeRoom].image"
                         alt="Confort de nos salles"
+                        decoding="async"
                         class="absolute inset-0
                                h-full w-full
                                object-cover"

@@ -72,6 +72,12 @@ let imageInterval = null
  */
 
 onMounted(() => {
+    // Préchargement en arrière-plan des images du slider
+    images.forEach((src) => {
+        const img = new Image()
+        img.src = src
+    })
+
     imageInterval = setInterval(() => {
         currentImage.value =
             (currentImage.value + 1) % images.length
@@ -291,6 +297,7 @@ onBeforeUnmount(() => {
                         :key="currentImage"
                         :src="images[currentImage]"
                         alt="Salle disponible à la réservation"
+                        decoding="async"
                         class="absolute inset-0
                                h-full w-full
                                object-cover"

@@ -235,6 +235,12 @@ const handleResize = () => {
 ===================================================== */
 
 onMounted(async () => {
+    // Préchargement en arrière-plan des images de la section Expériences
+    experiences.forEach((exp) => {
+        const img = new Image()
+        img.src = exp.image
+    })
+
     await nextTick()
 
     calculateCardWidth()
@@ -493,6 +499,7 @@ onBeforeUnmount(() => {
                                 <img
                                     :src="experience.image"
                                     :alt="experience.title"
+                                    decoding="async"
                                     draggable="false"
                                     class="
                                         h-full

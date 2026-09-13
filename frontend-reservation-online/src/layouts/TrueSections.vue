@@ -68,6 +68,7 @@ const repeatedLogos = Array.from({ length: 8 }, () => logos).flat()
                             <img
                                 :src="partner.src"
                                 :alt="partner.name"
+                                decoding="async"
                                 class="
                                     max-h-[30px]
                                     max-w-[90px]
@@ -118,6 +119,7 @@ const repeatedLogos = Array.from({ length: 8 }, () => logos).flat()
                             <img
                                 :src="partner.src"
                                 :alt="partner.name"
+                                decoding="async"
                                 class="
                                     max-h-[30px]
                                     max-w-[90px]

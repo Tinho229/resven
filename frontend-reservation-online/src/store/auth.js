@@ -86,7 +86,6 @@ export const useAuthStore = defineStore("auth", {
       this.loading = true;
 
       try {
-        
         const response = await axiosClient.post("/register", payload);
         const data = response.data.data;
 
