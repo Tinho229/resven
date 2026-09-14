@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        Reservation::rejeterReservationsExpirees();
+        Reservation::actualiserStatutsAutomatiques();
 
         $reservations = Reservation::with(['user', 'salle.images', 'equipements', 'creePar'])
             ->latest()

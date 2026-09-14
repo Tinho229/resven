@@ -34,7 +34,7 @@ const handleLogin = async () => {
   <Auth>
     <div>
       <!-- Titre -->
-      <h1 class="mb-6 text-center text-[32px] font-extrabold tracking-[-1.5px] text-[#111111]">
+      <h1 class="mb-5 text-center text-[26px] font-extrabold tracking-[-1px] text-[#111111] sm:mb-6 sm:text-[32px] sm:tracking-[-1.5px]">
         Connexion
       </h1>
 
@@ -55,11 +55,11 @@ const handleLogin = async () => {
       </div>
 
       <!-- Boutons informatifs -->
-      <div class="mb-6 grid grid-cols-2 gap-3">
-        <div class="flex h-[38px] items-center justify-center rounded-full bg-[#e6f0f6] text-[13px] font-medium text-[#111111]">
+      <div class="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:gap-3">
+        <div class="flex h-[36px] items-center justify-center rounded-full bg-[#e6f0f6] text-[12px] font-medium text-[#111111] sm:h-[38px] sm:text-[13px]">
           <span> Rapide & Simple</span>
         </div>
-        <div class="flex h-[38px] items-center justify-center rounded-full bg-[#e6f0f6] text-[13px] font-medium text-[#111111]">
+        <div class="flex h-[36px] items-center justify-center rounded-full bg-[#e6f0f6] text-[12px] font-medium text-[#111111] sm:h-[38px] sm:text-[13px]">
           <span> Accès Sécurisé</span>
         </div>
       </div>

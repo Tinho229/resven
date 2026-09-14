@@ -30,6 +30,8 @@ const adminReservationsStore = useAdminReservationsStore()
 const reservationId = route.params.id
 const reservation = ref(null)
 const isFetching = ref(true)
+const actionLoading = ref(false)
+const feedbackMessage = ref(null)
 
 const defaultPlaceholder =
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
@@ -50,10 +52,97 @@ onMounted(() => {
 })
 
 const activeImage = computed(() => {
-  if (reservation.value?.salle?.images && reservation.value.salle.images.length > 0) {
-    return reservation.value.salle.images[0].url || reservation.value.salle.images[0].path || defaultPlaceholder
+  const salle = reservation.value?.salle
+  if (!salle) return defaultPlaceholder
+
+  // Gestion des images (API Resource peut retourner `data` wrapper ou tableau direct)
+  const rawImages = salle.images?.data ?? salle.images
+  if (!rawImages || !Array.isArray(rawImages) || rawImages.length === 0) return defaultPlaceholder
+
+  const first = rawImages[0]
+  // Chercher l'URL dans tous les champs possibles
+  const imgUrl = first?.url || first?.path || first?.image_url || null
+
+  if (!imgUrl) return defaultPlaceholder
+  return imgUrl
+})
+
+const statusInfo = computed(() => {
+  if (!reservation.value) return { label: '', class: '', bgClass: '', isExpired: false, isFinished: false }
+  const st = reservation.value.status
+  const debut = reservation.value.date_heure_debut ? new Date(reservation.value.date_heure_debut) : null
+  const fin = reservation.value.date_heure_fin ? new Date(reservation.value.date_heure_fin) : null
+  const now = new Date()
+
+  if (st === 'en_attente') {
+    if (debut && debut <= now) {
+      return {
+        label: 'Expirée (Rejetée)',
+        class: 'text-rose-700',
+        bgClass: 'bg-rose-500/90',
+        isExpired: true,
+        isFinished: false,
+      }
+    }
+    return {
+      label: 'En attente',
+      class: 'text-amber-700',
+      bgClass: 'bg-amber-500/90',
+      isExpired: false,
+      isFinished: false,
+    }
   }
-  return defaultPlaceholder
+
+  if (st === 'confirmee') {
+    if (fin && fin <= now) {
+      return {
+        label: 'Terminée',
+        class: 'text-slate-700',
+        bgClass: 'bg-slate-700/90',
+        isExpired: false,
+        isFinished: true,
+      }
+    }
+    return {
+      label: 'Confirmée',
+      class: 'text-emerald-700',
+      bgClass: 'bg-emerald-500/90',
+      isExpired: false,
+      isFinished: false,
+    }
+  }
+
+  if (st === 'terminee') {
+    return {
+      label: 'Terminée',
+      class: 'text-slate-700',
+      bgClass: 'bg-slate-700/90',
+      isExpired: false,
+      isFinished: true,
+    }
+  }
+
+  if (st === 'rejetee') {
+    return {
+      label: 'Rejetée',
+      class: 'text-rose-700',
+      bgClass: 'bg-rose-500/90',
+      isExpired: true,
+      isFinished: false,
+    }
+  }
+
+  if (st === 'annulee') {
+    return {
+      label: 'Annulée',
+      class: 'text-gray-700',
+      bgClass: 'bg-gray-500/90',
+      isExpired: false,
+      isFinished: false,
+    }
+  }
+
+  return { label: st || 'Inconnu', class: 'text-gray-700', bgClass: 'bg-gray-500/90', isExpired: false, isFinished: false }
 })
 
 const formatDateTime = (dateString) => {
@@ -72,30 +161,57 @@ const formatDateTime = (dateString) => {
 }
 
 const handleConfirm = async () => {
+  actionLoading.value = true
+  feedbackMessage.value = null
   try {
-    await adminReservationsStore.confirmReservation(reservationId)
+    const res = await adminReservationsStore.confirmReservation(reservationId)
+    feedbackMessage.value = {
+      type: 'success',
+      text: res?.message || 'Réservation confirmée avec succès.',
+    }
     await loadDetails()
   } catch (e) {
-    console.error('Erreur confirmation :', e)
+    const msg = e?.response?.data?.message || adminReservationsStore.errorMessage || 'Impossible de confirmer cette réservation.'
+    feedbackMessage.value = { type: 'error', text: msg }
     await loadDetails()
+  } finally {
+    actionLoading.value = false
   }
 }
 
 const handleReject = async () => {
+  actionLoading.value = true
+  feedbackMessage.value = null
   try {
-    await adminReservationsStore.rejectReservation(reservationId)
+    const res = await adminReservationsStore.rejectReservation(reservationId)
+    feedbackMessage.value = {
+      type: 'success',
+      text: res?.message || 'Réservation rejetée avec succès.',
+    }
     await loadDetails()
   } catch (e) {
-    console.error('Erreur rejet :', e)
+    const msg = e?.response?.data?.message || adminReservationsStore.errorMessage || 'Impossible de rejeter cette réservation.'
+    feedbackMessage.value = { type: 'error', text: msg }
+  } finally {
+    actionLoading.value = false
   }
 }
 
 const handleTerminate = async () => {
+  actionLoading.value = true
+  feedbackMessage.value = null
   try {
-    await adminReservationsStore.terminateReservation(reservationId)
+    const res = await adminReservationsStore.terminateReservation(reservationId)
+    feedbackMessage.value = {
+      type: 'success',
+      text: res?.message || 'Réservation clôturée avec succès.',
+    }
     await loadDetails()
   } catch (e) {
-    console.error('Erreur clôture :', e)
+    const msg = e?.response?.data?.message || adminReservationsStore.errorMessage || 'Impossible de clôturer cette réservation.'
+    feedbackMessage.value = { type: 'error', text: msg }
+  } finally {
+    actionLoading.value = false
   }
 }
 </script>
@@ -116,16 +232,18 @@ const handleTerminate = async () => {
         <div v-if="reservation" class="flex flex-wrap items-center gap-2">
           <!-- Confirmer -->
           <button
-            v-if="reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) > new Date()"
+            v-if="reservation.status === 'en_attente' && !statusInfo.isExpired"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[8px] bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 active:scale-95"
+            :disabled="actionLoading"
+            class="inline-flex items-center gap-1.5 rounded-[8px] bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 active:scale-95 disabled:opacity-50 cursor-pointer"
             @click="handleConfirm"
           >
-            <Check :size="14" />
+            <Loader2 v-if="actionLoading" :size="14" class="animate-spin" />
+            <Check v-else :size="14" />
             <span>Confirmer</span>
           </button>
           <span
-            v-else-if="reservation.status === 'en_attente'"
+            v-else-if="reservation.status === 'en_attente' && statusInfo.isExpired"
             class="inline-flex items-center gap-1.5 rounded-[8px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600"
           >
             Délai expiré (non confirmable)
@@ -133,12 +251,14 @@ const handleTerminate = async () => {
 
           <!-- Clôturer -->
           <button
-            v-if="reservation.status === 'confirmee'"
+            v-if="reservation.status === 'confirmee' && !statusInfo.isFinished"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[8px] bg-slate-800 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-black active:scale-95"
+            :disabled="actionLoading"
+            class="inline-flex items-center gap-1.5 rounded-[8px] bg-slate-800 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-black active:scale-95 disabled:opacity-50 cursor-pointer"
             @click="handleTerminate"
           >
-            <Flag :size="14" />
+            <Loader2 v-if="actionLoading" :size="14" class="animate-spin" />
+            <Flag v-else :size="14" />
             <span>Marquer terminée</span>
           </button>
 
@@ -146,10 +266,12 @@ const handleTerminate = async () => {
           <button
             v-if="reservation.status === 'en_attente' || reservation.status === 'confirmee'"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[8px] border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 active:scale-95"
+            :disabled="actionLoading"
+            class="inline-flex items-center gap-1.5 rounded-[8px] border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 active:scale-95 disabled:opacity-50 cursor-pointer"
             @click="handleReject"
           >
-            <X :size="14" />
+            <Loader2 v-if="actionLoading" :size="14" class="animate-spin" />
+            <X v-else :size="14" />
             <span>Rejeter / Annuler</span>
           </button>
 
@@ -162,6 +284,16 @@ const handleTerminate = async () => {
             <span>Modifier</span>
           </RouterLink>
         </div>
+      </div>
+
+      <!-- BANNIÈRE DE NOTIFICATION ACTION -->
+      <div
+        v-if="feedbackMessage"
+        class="mb-6 flex items-center justify-between rounded-[10px] p-3.5 text-xs font-medium"
+        :class="feedbackMessage.type === 'success' ? 'border border-emerald-200 bg-emerald-50 text-emerald-800' : 'border border-rose-200 bg-rose-50 text-rose-800'"
+      >
+        <span>{{ feedbackMessage.text }}</span>
+        <button type="button" @click="feedbackMessage = null" class="ml-3 text-sm font-bold opacity-70 hover:opacity-100">&times;</button>
       </div>
 
       <!-- CHARGEMENT -->
@@ -227,13 +359,13 @@ const handleTerminate = async () => {
                 <div
                   class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-semibold text-white backdrop-blur-md capitalize"
                   :class="{
-                    'bg-emerald-500/90': reservation.status === 'confirmee',
+                    'bg-emerald-500/90': reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) > new Date(),
                     'bg-amber-500/90': reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) > new Date(),
-                    'bg-slate-700/90': reservation.status === 'terminee',
+                    'bg-slate-700/90': reservation.status === 'terminee' || (reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) <= new Date()),
                     'bg-rose-500/90': reservation.status === 'rejetee' || (reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date()),
                   }"
                 >
-                  {{ reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date() ? 'Expirée' : reservation.status }}
+                  {{ reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date() ? 'Expirée' : (reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) <= new Date() ? 'Terminée' : reservation.status) }}
                 </div>
               </div>
             </div>
@@ -373,20 +505,21 @@ const handleTerminate = async () => {
                     <span
                       class="font-semibold uppercase"
                       :class="{
-                        'text-emerald-700': reservation.status === 'confirmee',
-                        'text-amber-700': reservation.status === 'en_attente',
-                        'text-slate-700': reservation.status === 'terminee',
-                        'text-rose-700': reservation.status === 'rejetee',
+                        'text-emerald-700': reservation.status === 'confirmee' && !statusInfo.isFinished,
+                        'text-amber-700': reservation.status === 'en_attente' && !statusInfo.isExpired,
+                        'text-slate-700': reservation.status === 'terminee' || statusInfo.isFinished,
+                        'text-rose-700': reservation.status === 'rejetee' || statusInfo.isExpired,
+                        'text-gray-500': reservation.status === 'annulee',
                       }"
                     >
-                      {{ reservation.status }}
+                      {{ statusInfo.label }}
                     </span>
                   </div>
 
                   <div class="flex items-center justify-between text-[#777]">
                     <span>Créée par</span>
                     <span class="font-semibold text-[#191919]">
-                      {{ reservation.createur?.nom || (reservation.creer_par ? 'Admin #' + reservation.creer_par : 'Système') }}
+                      {{ reservation.createur?.nom || (reservation.cree_par_id ? 'Admin #' + reservation.cree_par_id : 'Système') }}
                     </span>
                   </div>
 

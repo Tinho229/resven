@@ -48,7 +48,7 @@ const handleRegister = async () => {
   <Auth>
     <div>
       <!-- Titre -->
-      <h1 class="mb-6 text-center text-[32px] font-extrabold tracking-[-1.5px] text-[#111111]">
+      <h1 class="mb-5 text-center text-[26px] font-extrabold tracking-[-1px] text-[#111111] sm:mb-6 sm:text-[32px] sm:tracking-[-1.5px]">
         Créer un compte
       </h1>
 

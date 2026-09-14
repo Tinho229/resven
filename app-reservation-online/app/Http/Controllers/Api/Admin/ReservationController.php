@@ -23,10 +23,10 @@ class ReservationController extends Controller
     public function index(Request $request): JsonResponse|AnonymousResourceCollection
     {
         try {
-            Reservation::rejeterReservationsExpirees();
+            Reservation::actualiserStatutsAutomatiques();
 
             $query = Reservation::query()
-                ->with(['salle', 'user', 'createur', 'equipements'])
+                ->with(['salle.images', 'user', 'createur', 'equipements'])
                 ->latest('date_heure_debut');
 
             // Filtre par statut
@@ -199,7 +199,7 @@ class ReservationController extends Controller
 
             return response()->json([
                 'message' => 'Réservation créée avec succès.',
-                'data' => new ReservationResource($reservation->load(['salle', 'user', 'createur', 'equipements'])),
+                'data' => new ReservationResource($reservation->load(['salle.images', 'user', 'createur', 'equipements'])),
             ], 201);
         } catch (Exception $e) {
             DB::rollBack();
@@ -217,9 +217,9 @@ class ReservationController extends Controller
     public function show(string $id): JsonResponse
     {
         try {
-            Reservation::rejeterReservationsExpirees();
+            Reservation::actualiserStatutsAutomatiques();
 
-            $reservation = Reservation::with(['salle', 'user', 'createur', 'equipements'])->find($id);
+            $reservation = Reservation::with(['salle.images', 'user', 'createur', 'equipements'])->find($id);
 
             if (!$reservation) {
                 return response()->json([

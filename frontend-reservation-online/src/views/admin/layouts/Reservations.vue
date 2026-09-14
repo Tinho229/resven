@@ -95,9 +95,12 @@ const formatDateTime = (dateString) => {
   }
 }
 
-const getStatusBadge = (st, dateDebut) => {
+const getStatusBadge = (st, dateDebut, dateFin) => {
   switch (st) {
     case 'confirmee':
+      if (dateFin && new Date(dateFin) <= new Date()) {
+        return { label: 'Terminée', class: 'bg-slate-100 text-slate-700' }
+      }
       return { label: 'Confirmée', class: 'bg-emerald-100 text-emerald-700' }
     case 'en_attente':
       if (dateDebut && new Date(dateDebut) <= new Date()) {
@@ -351,9 +354,9 @@ const confirmDelete = async () => {
               <td class="py-3.5 px-4">
                 <span
                   class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                  :class="getStatusBadge(res.status, res.date_heure_debut).class"
+                  :class="getStatusBadge(res.status, res.date_heure_debut, res.date_heure_fin).class"
                 >
-                  • {{ getStatusBadge(res.status, res.date_heure_debut).label }}
+                  • {{ getStatusBadge(res.status, res.date_heure_debut, res.date_heure_fin).label }}
                 </span>
               </td>
 
@@ -373,7 +376,7 @@ const confirmDelete = async () => {
 
                   <!-- Validation rapide : Clôturer -->
                   <button
-                    v-if="res.status === 'confirmee'"
+                    v-if="res.status === 'confirmee' && new Date(res.date_heure_fin) > new Date()"
                     type="button"
                     title="Marquer terminée"
                     class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition hover:bg-slate-100 cursor-pointer"

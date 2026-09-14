@@ -9,10 +9,11 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('reservations:rejeter-expirees', function () {
-    $nb = Reservation::rejeterReservationsExpirees();
-    $this->info("{$nb} réservation(s) expirée(s) ont été rejetée(s) avec succès.");
-})->purpose('Passer automatiquement au statut rejetée les réservations en attente dont le délai a expiré');
+Artisan::command('reservations:actualiser-statuts', function () {
+    $res = Reservation::actualiserStatutsAutomatiques();
+    $this->info("{$res['rejetees']} réservation(s) expirée(s) rejetée(s), {$res['terminees']} réservation(s) clôturée(s) terminée(s).");
+})->purpose('Actualiser les statuts : rejeter les expirées et clôturer les confirmées dont la durée est terminée');
 
-Schedule::command('reservations:rejeter-expirees')->everyMinute();
+Schedule::command('reservations:actualiser-statuts')->everyMinute();
+
 

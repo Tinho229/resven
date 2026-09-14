@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        Reservation::rejeterReservationsExpirees();
+        Reservation::actualiserStatutsAutomatiques();
 
         $reservations = Reservation::with(['salle.images', 'equipements'])
             ->where('user_id', $request->user()->id)
@@ -30,7 +30,7 @@ class ReservationController extends Controller
 
     public function show(Request $request, Reservation $reservation): JsonResponse
     {
-        Reservation::rejeterReservationsExpirees();
+        Reservation::actualiserStatutsAutomatiques();
         $reservation->refresh();
 
         if ($reservation->user_id !== $request->user()->id) {

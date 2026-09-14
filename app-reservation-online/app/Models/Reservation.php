@@ -180,11 +180,43 @@ class Reservation extends Model
     }
 
     /**
+     * Clôture automatiquement toutes les réservations confirmées dont la durée est écoulée (date_heure_fin <= now()).
+     */
+    public static function terminerReservationsPassees(): int
+    {
+        return static::where('status', 'confirmee')
+            ->where('date_heure_fin', '<=', now())
+            ->update([
+                'status' => 'terminee',
+                'terminee_at' => now(),
+            ]);
+    }
+
+    /**
+     * Actualise les statuts automatiques (rejet des expirées et clôture des confirmées écoulées).
+     */
+    public static function actualiserStatutsAutomatiques(): array
+    {
+        return [
+            'rejetees' => static::rejeterReservationsExpirees(),
+            'terminees' => static::terminerReservationsPassees(),
+        ];
+    }
+
+    /**
      * Vérifie si la date de début de la réservation est passée.
      */
     public function isExpired(): bool
     {
         return $this->date_heure_debut && $this->date_heure_debut->isPast();
+    }
+
+    /**
+     * Vérifie si la date de fin de la réservation est passée (durée écoulée).
+     */
+    public function isFinished(): bool
+    {
+        return $this->date_heure_fin && $this->date_heure_fin->isPast();
     }
 }
 

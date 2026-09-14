@@ -22,7 +22,9 @@ class SalleResource extends JsonResource
             'status' => $this->status,
             'localisation' => $this->localisation,
             'prix' => (float) $this->prix,
-            'images' => ImageResource::collection($this->whenLoaded('images')),
+            'images' => $this->whenLoaded('images', fn() =>
+                $this->images->map(fn($img) => (new ImageResource($img))->toArray($request))
+            ),
             'reservations_count' => $this->whenCounted('reservations'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
