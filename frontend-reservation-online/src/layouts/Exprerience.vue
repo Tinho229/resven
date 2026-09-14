@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import {
     ChevronLeft,
@@ -537,9 +538,10 @@ onBeforeUnmount(() => {
 
                                 <!-- BOUTON -->
 
-                                <button
-                                    type="button"
+                                <RouterLink
+                                    :to="{ name: 'salles' }"
                                     class="
+                                        inline-block
                                         mt-3
                                         bg-[#0F172A]
                                         px-5
@@ -555,7 +557,7 @@ onBeforeUnmount(() => {
                                     "
                                 >
                                     DÉCOUVRIR
-                                </button>
+                                </RouterLink>
 
                             </div>
 
