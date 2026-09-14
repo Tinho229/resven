@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminReservationsStore } from '@/store/adminReservations'
@@ -47,24 +47,54 @@ const loadDetails = async () => {
   }
 }
 
+// --- Carrousel d'images ---
+const currentImageIndex = ref(0)
+let slideshowTimer = null
+
+const imagesList = computed(() => {
+  const salle = reservation.value?.salle
+  if (!salle) return [defaultPlaceholder]
+  const rawImages = salle.images?.data ?? salle.images
+  if (!rawImages || !Array.isArray(rawImages) || rawImages.length === 0) return [defaultPlaceholder]
+  const urls = rawImages.map(img => img?.url || img?.path || img?.image_url).filter(Boolean)
+  return urls.length > 0 ? urls : [defaultPlaceholder]
+})
+
+const activeImage = computed(() => imagesList.value[currentImageIndex.value] ?? defaultPlaceholder)
+
+const startSlideshow = () => {
+  stopSlideshow()
+  if (imagesList.value.length > 1) {
+    slideshowTimer = setInterval(() => {
+      currentImageIndex.value = (currentImageIndex.value + 1) % imagesList.value.length
+    }, 4000)
+  }
+}
+
+const stopSlideshow = () => {
+  if (slideshowTimer) {
+    clearInterval(slideshowTimer)
+    slideshowTimer = null
+  }
+}
+
+const goToImage = (index) => {
+  currentImageIndex.value = index
+  startSlideshow()
+}
+
+// Redémarre le carrousel quand la réservation (et ses images) est chargée
+watch(imagesList, () => {
+  currentImageIndex.value = 0
+  startSlideshow()
+}, { immediate: false })
+
 onMounted(() => {
   loadDetails()
 })
 
-const activeImage = computed(() => {
-  const salle = reservation.value?.salle
-  if (!salle) return defaultPlaceholder
-
-  // Gestion des images (API Resource peut retourner `data` wrapper ou tableau direct)
-  const rawImages = salle.images?.data ?? salle.images
-  if (!rawImages || !Array.isArray(rawImages) || rawImages.length === 0) return defaultPlaceholder
-
-  const first = rawImages[0]
-  // Chercher l'URL dans tous les champs possibles
-  const imgUrl = first?.url || first?.path || first?.image_url || null
-
-  if (!imgUrl) return defaultPlaceholder
-  return imgUrl
+onUnmounted(() => {
+  stopSlideshow()
 })
 
 const statusInfo = computed(() => {
@@ -327,15 +357,36 @@ const handleTerminate = async () => {
       <div v-else-if="reservation">
         <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white shadow-sm">
           <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
-            <!-- IMAGE GAUCHE -->
+            <!-- IMAGE GAUCHE (Carrousel) -->
             <div class="relative min-h-[390px] overflow-hidden bg-[#e9e8e4] lg:min-h-0">
-              <img
-                :src="activeImage"
-                :alt="reservation.salle?.nom || 'Salle réservée'"
-                class="absolute inset-0 h-full w-full object-cover"
-              />
+              <!-- Images avec transition fondue -->
+              <transition-group name="img-fade" tag="div" class="absolute inset-0">
+                <img
+                  v-for="(imgUrl, idx) in imagesList"
+                  :key="imgUrl"
+                  v-show="idx === currentImageIndex"
+                  :src="imgUrl"
+                  :alt="reservation.salle?.nom || 'Salle réservée'"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+              </transition-group>
 
               <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/5"></div>
+
+              <!-- Points de navigation (visible si plusieurs images) -->
+              <div
+                v-if="imagesList.length > 1"
+                class="absolute bottom-16 left-0 right-0 flex justify-center gap-1.5 z-10"
+              >
+                <button
+                  v-for="(_, idx) in imagesList"
+                  :key="idx"
+                  type="button"
+                  @click="goToImage(idx)"
+                  class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+                  :class="idx === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'"
+                />
+              </div>
 
               <div class="absolute left-5 top-5">
                 <div
