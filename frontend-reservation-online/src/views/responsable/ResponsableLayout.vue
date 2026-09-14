@@ -15,9 +15,12 @@ onMounted(() => {
 <template>
   <div class="flex min-h-screen bg-slate-50">
     <SidebarResponsable />
-    <main class="flex-1 px-8 py-8 max-w-6xl mx-auto w-full">
+
+    <!-- Contenu principal — décalé à droite sur desktop, plein largeur sur mobile -->
+    <main class="flex-1 min-w-0 lg:ml-64 px-4 py-6 sm:px-6 lg:px-8 pt-16 lg:pt-8 max-w-full">
       <RouterView />
     </main>
+
     <ToastContainer />
   </div>
 </template>

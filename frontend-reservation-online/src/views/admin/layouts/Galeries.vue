@@ -167,16 +167,16 @@ const confirmDelete = async () => {
         </button>
       </div>
 
-      <!-- BARRE DE RECHERCHE & FILTRES (STYLE DIGILAB) -->
-      <div class="flex flex-wrap items-center justify-between gap-4 rounded-t-xl border border-b-0 border-slate-200 bg-white p-4 shadow-sm">
-        <div class="flex flex-1 flex-wrap items-center gap-3">
+      <!-- BARRE DE RECHERCHE & FILTRES RESPONSIVE -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 rounded-t-xl border border-b-0 border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
+        <div class="flex flex-1 flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3">
           <!-- Recherche -->
-          <div class="relative w-64">
+          <div class="relative w-full sm:w-64">
             <input
               v-model="search"
               type="text"
               placeholder="Rechercher une photo..."
-              class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 pl-9 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white"
+              class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 sm:py-1.5 pl-9 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white"
               @input="handleSearch"
             />
             <Search :size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -185,7 +185,7 @@ const confirmDelete = async () => {
           <!-- Filtre Salle -->
           <select
             v-model="selectedSalle"
-            class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white"
+            class="w-full sm:w-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 sm:py-1.5 text-sm text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white"
             @change="handleSalleChange"
           >
             <option value="">Toutes les salles</option>
@@ -199,10 +199,10 @@ const confirmDelete = async () => {
           </select>
 
           <!-- Toggle vue Tableau / Grille -->
-          <div class="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          <div class="flex items-center self-start sm:self-auto rounded-lg border border-slate-200 bg-slate-50 p-0.5">
             <button
               type="button"
-              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition"
+              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition cursor-pointer"
               :class="viewMode === 'table' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
               @click="viewMode = 'table'"
             >
@@ -211,7 +211,7 @@ const confirmDelete = async () => {
             </button>
             <button
               type="button"
-              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition"
+              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition cursor-pointer"
               :class="viewMode === 'grid' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
               @click="viewMode = 'grid'"
             >
@@ -220,20 +220,20 @@ const confirmDelete = async () => {
             </button>
           </div>
 
-          <span class="text-xs text-slate-400">
-            {{ filteredImages.length }} image(s) affichée(s)
+          <span class="text-xs text-slate-400 sm:self-center">
+            {{ filteredImages.length }} image(s)
           </span>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
           <div class="flex items-center gap-2 text-xs text-slate-500">
             <span>Tri :</span>
             <select
               v-model="sortOrder"
-              class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+              class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 sm:py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
             >
-              <option value="desc">Plus récentes (ID Décroissant)</option>
-              <option value="asc">Plus anciennes (ID Croissant)</option>
+              <option value="desc">Plus récentes</option>
+              <option value="asc">Plus anciennes</option>
             </select>
           </div>
         </div>

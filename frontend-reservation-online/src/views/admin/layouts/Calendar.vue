@@ -306,7 +306,7 @@ const monthDays = computed(() => {
   <AppAdmin>
     <div class="mx-auto max-w-7xl pb-10">
       <section
-        class="w-full rounded-2xl border border-[#EEF1F5] bg-white px-6 py-5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)]"
+        class="w-full rounded-2xl border border-[#EEF1F5] bg-white px-3.5 sm:px-6 py-4 sm:py-5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)]"
       >
         <!-- HEADER AGENDA (STYLE DEMANDÉ) -->
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
