@@ -4,6 +4,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import NavBar from '@/layouts/NavBar.vue'
 import Footer from '@/layouts/Footer.vue'
 import { useReservationsStore } from '@/store/reservations'
+import { parseLocalDate } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   Calendar,
@@ -79,26 +80,28 @@ const activeImage = computed(() => {
 
 // Utilitaires de formatage
 const formatDateOnly = (dateStr) => {
-  if (!dateStr) return 'N/A'
+  const d = parseLocalDate(dateStr)
+  if (!d) return 'N/A'
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    }).format(new Date(dateStr))
+    }).format(d)
   } catch {
     return dateStr
   }
 }
 
 const formatTimeOnly = (dateStr) => {
-  if (!dateStr) return ''
+  const d = parseLocalDate(dateStr)
+  if (!d) return ''
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(dateStr))
+    }).format(d)
   } catch {
     return ''
   }
@@ -107,8 +110,9 @@ const formatTimeOnly = (dateStr) => {
 // Calcul de la durée
 const durationText = computed(() => {
   if (!reservation.value?.date_heure_debut || !reservation.value?.date_heure_fin) return ''
-  const debut = new Date(reservation.value.date_heure_debut)
-  const fin = new Date(reservation.value.date_heure_fin)
+  const debut = parseLocalDate(reservation.value.date_heure_debut)
+  const fin = parseLocalDate(reservation.value.date_heure_fin)
+  if (!debut || !fin) return ''
   const diffMs = fin - debut
   if (diffMs <= 0) return '0 min'
   const totalMinutes = Math.round(diffMs / 60000)

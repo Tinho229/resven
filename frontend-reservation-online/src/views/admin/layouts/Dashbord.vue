@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminDashboardStore } from '@/store/adminDashboard'
+import { parseLocalDate } from '@/helpers/dateHelper'
 import {
   Users,
   UserCheck,
@@ -86,13 +87,14 @@ const maxMonthCount = computed(() => {
 
 // Utilitaires de formatage
 const formatDate = (dateStr) => {
-  if (!dateStr) return 'N/A'
+  const d = parseLocalDate(dateStr)
+  if (!d) return 'N/A'
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-    }).format(new Date(dateStr))
+    }).format(d)
   } catch {
     return dateStr
   }
@@ -100,16 +102,19 @@ const formatDate = (dateStr) => {
 
 const formatTimeRange = (debutStr, finStr) => {
   if (!debutStr || !finStr) return ''
+  const debut = parseLocalDate(debutStr)
+  const fin = parseLocalDate(finStr)
+  if (!debut || !fin) return ''
   try {
-    const debut = new Intl.DateTimeFormat('fr-FR', {
+    const dStr = new Intl.DateTimeFormat('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(debutStr))
-    const fin = new Intl.DateTimeFormat('fr-FR', {
+    }).format(debut)
+    const fStr = new Intl.DateTimeFormat('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(finStr))
-    return `${debut} - ${fin}`
+    }).format(fin)
+    return `${dStr} - ${fStr}`
   } catch {
     return ''
   }

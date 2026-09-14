@@ -5,6 +5,7 @@ import ConfirmActionDialog from "./ConfirmActionDialog.vue";
 import DetailsReservationModal from "./DetailsReservationModal.vue";
 import { useReservationStatut } from "@/composables/useReservationStatut";
 import { Phone, Eye, Search, Loader2, ChevronLeft, ChevronRight, Check, X } from "lucide-vue-next";
+import { formatDateTime, parseLocalDate } from "@/helpers/dateHelper";
 
 const props = defineProps({
   reservations: { type: Array, required: true },
@@ -65,16 +66,17 @@ function ouvrirDetails(reservation) {
 }
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleString("fr-FR", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
+  return formatDateTime(dateString);
 }
 function formatDateCourt(dateString) {
-  return new Date(dateString).toLocaleString("fr-FR", {
-    day: "2-digit", month: "2-digit",
-    hour: "2-digit", minute: "2-digit",
-  });
+  const d = parseLocalDate(dateString);
+  if (!d) return "—";
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
 }
 
 function categorieDate(reservation) {
@@ -82,7 +84,8 @@ function categorieDate(reservation) {
   aujourdHui.setHours(0, 0, 0, 0);
   const demain = new Date(aujourdHui);
   demain.setDate(demain.getDate() + 1);
-  const debut = new Date(reservation.date_heure_debut);
+  const debut = parseLocalDate(reservation.date_heure_debut);
+  if (!debut) return "À venir";
   if (debut < aujourdHui) return "Passées";
   if (debut < demain) return "Aujourd'hui";
   return "À venir";

@@ -6,6 +6,7 @@ import Footer from '@/layouts/Footer.vue'
 import { useSallesStore } from '@/store/salles'
 import { useEquipementsStore } from '@/store/equipements'
 import { useReservationsStore } from '@/store/reservations'
+import { toInputDateTime, toApiDateTime } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   Calendar,
@@ -86,28 +87,6 @@ const salleCoverUrl = computed(() => {
   }
   return defaultImage
 })
-
-// Convertir une date ISO en format input datetime-local (YYYY-MM-DDTHH:mm)
-const toInputDateTime = (dtStr) => {
-  if (!dtStr) return ''
-  try {
-    const d = new Date(dtStr)
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const dd = String(d.getDate()).padStart(2, '0')
-    const hh = String(d.getHours()).padStart(2, '0')
-    const min = String(d.getMinutes()).padStart(2, '0')
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`
-  } catch {
-    return ''
-  }
-}
-
-// Convertir un input datetime-local en YYYY-MM-DD HH:mm:ss
-const toApiDateTime = (dtLocal) => {
-  if (!dtLocal) return ''
-  return dtLocal.replace('T', ' ') + ':00'
-}
 
 onMounted(async () => {
   try {

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import NavBar from '@/layouts/NavBar.vue'
 import Footer from '@/layouts/Footer.vue'
 import { useReservationsStore } from '@/store/reservations'
+import { parseLocalDate } from '@/helpers/dateHelper'
 import {
   Calendar,
   Clock,
@@ -98,14 +99,15 @@ const filteredReservations = computed(() => {
 
 // Utilitaires de formatage
 const formatDate = (dateStr) => {
-  if (!dateStr) return 'N/A'
+  const d = parseLocalDate(dateStr)
+  if (!d) return 'N/A'
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-    }).format(new Date(dateStr))
+    }).format(d)
   } catch {
     return dateStr
   }
@@ -113,16 +115,19 @@ const formatDate = (dateStr) => {
 
 const formatTimeRange = (debutStr, finStr) => {
   if (!debutStr || !finStr) return ''
+  const debut = parseLocalDate(debutStr)
+  const fin = parseLocalDate(finStr)
+  if (!debut || !fin) return ''
   try {
-    const debut = new Intl.DateTimeFormat('fr-FR', {
+    const dStr = new Intl.DateTimeFormat('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(debutStr))
-    const fin = new Intl.DateTimeFormat('fr-FR', {
+    }).format(debut)
+    const fStr = new Intl.DateTimeFormat('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(finStr))
-    return `${debut} - ${fin}`
+    }).format(fin)
+    return `${dStr} - ${fStr}`
   } catch {
     return ''
   }

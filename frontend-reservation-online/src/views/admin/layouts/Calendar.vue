@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminReservationsStore } from '@/store/adminReservations'
 import { useAdminSallesStore } from '@/store/adminSalles'
+import { parseLocalDate } from '@/helpers/dateHelper'
 import {
   CalendarDays,
   Plus,
@@ -143,9 +144,10 @@ const getStatusColorKey = (status) => {
 // Formatage d'heure (ex: "10.00 - 12.30")
 const formatHourRange = (startStr, endStr) => {
   if (!startStr || !endStr) return ''
+  const s = parseLocalDate(startStr)
+  const e = parseLocalDate(endStr)
+  if (!s || !e) return ''
   try {
-    const s = new Date(startStr)
-    const e = new Date(endStr)
     const sH = String(s.getHours()).padStart(2, '0') + '.' + String(s.getMinutes()).padStart(2, '0')
     const eH = String(e.getHours()).padStart(2, '0') + '.' + String(e.getMinutes()).padStart(2, '0')
     return `${sH} - ${eH}`
@@ -203,11 +205,12 @@ const getDayAppointments = (dayDate) => {
   return filteredReservations.value
     .filter((r) => {
       if (!r.date_heure_debut) return false
-      return new Date(r.date_heure_debut).toDateString() === dayStr
+      const s = parseLocalDate(r.date_heure_debut)
+      return s && s.toDateString() === dayStr
     })
     .map((r) => {
-      const s = new Date(r.date_heure_debut)
-      const e = r.date_heure_fin ? new Date(r.date_heure_fin) : new Date(s.getTime() + 60 * 60 * 1000)
+      const s = parseLocalDate(r.date_heure_debut)
+      const e = r.date_heure_fin ? parseLocalDate(r.date_heure_fin) : new Date(s.getTime() + 60 * 60 * 1000)
 
       const sHour = s.getHours() + s.getMinutes() / 60
       const eHour = e.getHours() + e.getMinutes() / 60

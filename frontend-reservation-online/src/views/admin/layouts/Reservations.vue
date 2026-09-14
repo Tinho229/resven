@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminReservationsStore } from '@/store/adminReservations'
 import { useAdminSallesStore } from '@/store/adminSalles'
+import { formatDateTime, parseLocalDate } from '@/helpers/dateHelper'
 import {
   Plus,
   Eye,
@@ -86,31 +87,19 @@ const filteredReservations = computed(() => {
   return result
 })
 
-const formatDateTime = (dateString) => {
-  if (!dateString) return 'N/A'
-  try {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date)
-  } catch {
-    return dateString
-  }
-}
-
 const getStatusBadge = (st, dateDebut, dateFin) => {
+  const debut = parseLocalDate(dateDebut)
+  const fin = parseLocalDate(dateFin)
+  const now = new Date()
+
   switch (st) {
     case 'confirmee':
-      if (dateFin && new Date(dateFin) <= new Date()) {
+      if (fin && fin <= now) {
         return { label: 'Terminée', class: 'bg-slate-100 text-slate-700' }
       }
       return { label: 'Confirmée', class: 'bg-emerald-100 text-emerald-700' }
     case 'en_attente':
-      if (dateDebut && new Date(dateDebut) <= new Date()) {
+      if (debut && debut <= now) {
         return { label: 'Expirée (Rejetée)', class: 'bg-rose-100 text-rose-700' }
       }
       return { label: 'En attente', class: 'bg-amber-100 text-amber-700' }

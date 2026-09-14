@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminReservationsStore } from '@/store/adminReservations'
+import { formatDateTime, parseLocalDate } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   Pencil,
@@ -100,8 +101,8 @@ onUnmounted(() => {
 const statusInfo = computed(() => {
   if (!reservation.value) return { label: '', class: '', bgClass: '', isExpired: false, isFinished: false }
   const st = reservation.value.status
-  const debut = reservation.value.date_heure_debut ? new Date(reservation.value.date_heure_debut) : null
-  const fin = reservation.value.date_heure_fin ? new Date(reservation.value.date_heure_fin) : null
+  const debut = parseLocalDate(reservation.value.date_heure_debut)
+  const fin = parseLocalDate(reservation.value.date_heure_fin)
   const now = new Date()
 
   if (st === 'en_attente') {
@@ -174,21 +175,6 @@ const statusInfo = computed(() => {
 
   return { label: st || 'Inconnu', class: 'text-gray-700', bgClass: 'bg-gray-500/90', isExpired: false, isFinished: false }
 })
-
-const formatDateTime = (dateString) => {
-  if (!dateString) return 'N/A'
-  try {
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dateString))
-  } catch {
-    return dateString
-  }
-}
 
 const handleConfirm = async () => {
   actionLoading.value = true

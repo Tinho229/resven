@@ -3,7 +3,7 @@ import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } fro
 import { X, Phone, Users, Calendar, Package, UserCog, MapPin, Banknote } from "@lucide/vue";
 import StatusBadge from "./StatusBadge.vue";
 import { useReservationStatut } from "@/composables/useReservationStatut";
-
+import { formatDateTime } from "@/helpers/dateHelper";
 
 defineProps({
   open: Boolean,
@@ -19,13 +19,7 @@ const emit = defineEmits(["fermer"]);
 
 function formatDate(dateString) {
   if (!dateString) return "—";
-  return new Date(dateString).toLocaleString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTime(dateString);
 }
 </script>
 

@@ -6,6 +6,7 @@ import { useAdminReservationsStore } from '@/store/adminReservations'
 import { useAdminSallesStore } from '@/store/adminSalles'
 import { useAdminUsersStore } from '@/store/adminUsers'
 import { useAdminEquipementsStore } from '@/store/adminEquipements'
+import { toInputDateTime, toApiDateTime } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   Calendar,
@@ -59,26 +60,6 @@ const selectedEquipements = ref([]) // [{ equipement_id, nom, quantity, stock_to
 
 const defaultPlaceholder =
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
-
-const toInputDateTime = (dtStr) => {
-  if (!dtStr) return ''
-  try {
-    const d = new Date(dtStr)
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const dd = String(d.getDate()).padStart(2, '0')
-    const hh = String(d.getHours()).padStart(2, '0')
-    const min = String(d.getMinutes()).padStart(2, '0')
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`
-  } catch {
-    return ''
-  }
-}
-
-const toApiDateTime = (dtLocal) => {
-  if (!dtLocal) return ''
-  return dtLocal.replace('T', ' ') + (dtLocal.length === 16 ? ':00' : '')
-}
 
 onMounted(async () => {
   adminReservationsStore.clearErrors()

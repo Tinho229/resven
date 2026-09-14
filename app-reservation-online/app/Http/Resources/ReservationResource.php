@@ -16,11 +16,11 @@ class ReservationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'date_heure_debut' => $this->date_heure_debut ? $this->date_heure_debut->toIso8601String() : null,
-            'date_heure_fin' => $this->date_heure_fin ? $this->date_heure_fin->toIso8601String() : null,
+            'date_heure_debut' => $this->date_heure_debut ? $this->date_heure_debut->format('Y-m-d H:i:s') : null,
+            'date_heure_fin' => $this->date_heure_fin ? $this->date_heure_fin->format('Y-m-d H:i:s') : null,
             'nombre_personnes' => (int) $this->nombre_personnes,
             'status' => $this->status,
-            'terminee_at' => $this->terminee_at ? $this->terminee_at->toIso8601String() : null,
+            'terminee_at' => $this->terminee_at ? $this->terminee_at->format('Y-m-d H:i:s') : null,
             'nom_client' => $this->nom_client,
             'telephone_client' => $this->telephone_client,
             'nom_affiche' => $this->nom_affiche,

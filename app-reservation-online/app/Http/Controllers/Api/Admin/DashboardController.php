@@ -94,11 +94,11 @@ class DashboardController extends Controller
                         'client_telephone' => $res->telephone_affiche,
                         'salle_nom' => $res->salle?->nom ?? 'Salle #' . $res->salle_id,
                         'salle_localisation' => $res->salle?->localisation,
-                        'date_heure_debut' => $res->date_heure_debut?->toIso8601String(),
-                        'date_heure_fin' => $res->date_heure_fin?->toIso8601String(),
+                        'date_heure_debut' => $res->date_heure_debut?->format('Y-m-d H:i:s'),
+                        'date_heure_fin' => $res->date_heure_fin?->format('Y-m-d H:i:s'),
                         'nombre_personnes' => $res->nombre_personnes,
                         'status' => $res->status,
-                        'created_at' => $res->created_at?->toIso8601String(),
+                        'created_at' => $res->created_at?->format('Y-m-d H:i:s'),
                     ];
                 });
 

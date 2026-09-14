@@ -73,7 +73,7 @@ const handleReserver = () => {
     <div class="min-h-[80vh] bg-[#f6f6f4] text-[#151515]">
         <NavBar />
 
-        <div class="px-4 py-10 sm:px-6 lg:px-10">
+        <div class="px-4 py-25 sm:px-6 lg:px-10">
             <div class="mx-auto max-w-[1180px]">
 
 

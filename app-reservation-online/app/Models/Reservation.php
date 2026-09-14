@@ -38,6 +38,11 @@ class Reservation extends Model
 
     protected $appends = ['nom_demandeur'];
 
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

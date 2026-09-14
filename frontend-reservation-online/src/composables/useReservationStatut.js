@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { parseLocalDate } from "@/helpers/dateHelper";
 
 const maintenant = ref(new Date());
 
@@ -11,20 +12,24 @@ if (typeof window !== "undefined" && !window.__horlogeReservationDemarree) {
 
 export function useReservationStatut() {
   function estEnCours(reservation) {
-    if (reservation.status !== "confirmee") return false;
-    const debut = new Date(reservation.date_heure_debut);
-    const fin = new Date(reservation.date_heure_fin);
+    if (!reservation || reservation.status !== "confirmee") return false;
+    const debut = parseLocalDate(reservation.date_heure_debut);
+    const fin = parseLocalDate(reservation.date_heure_fin);
+    if (!debut || !fin) return false;
     return maintenant.value >= debut && maintenant.value <= fin;
   }
 
   function estTerminee(reservation) {
-    if (reservation.status !== "confirmee") return false;
-    const fin = new Date(reservation.date_heure_fin);
+    if (!reservation || reservation.status !== "confirmee") return false;
+    const fin = parseLocalDate(reservation.date_heure_fin);
+    if (!fin) return false;
     return maintenant.value > fin;
   }
 
   function tempsRestant(reservation) {
-    const fin = new Date(reservation.date_heure_fin);
+    if (!reservation) return null;
+    const fin = parseLocalDate(reservation.date_heure_fin);
+    if (!fin) return null;
     const diffMs = fin - maintenant.value;
     if (diffMs <= 0) return null;
 
@@ -39,13 +44,16 @@ export function useReservationStatut() {
   }
 
   function estAVenir(reservation) {
-    if (reservation.status !== "confirmee") return false;
-    const debut = new Date(reservation.date_heure_debut);
+    if (!reservation || reservation.status !== "confirmee") return false;
+    const debut = parseLocalDate(reservation.date_heure_debut);
+    if (!debut) return false;
     return maintenant.value < debut;
   }
 
   function tempsAvantDebut(reservation) {
-    const debut = new Date(reservation.date_heure_debut);
+    if (!reservation) return null;
+    const debut = parseLocalDate(reservation.date_heure_debut);
+    if (!debut) return null;
     const diffMs = debut - maintenant.value;
     if (diffMs <= 0) return null;
 
@@ -66,16 +74,17 @@ export function useReservationStatut() {
   function estExpiree(reservation) {
     if (!reservation) return false;
     if (reservation.status === "rejetee") return true;
-    const debut = new Date(reservation.date_heure_debut);
+    const debut = parseLocalDate(reservation.date_heure_debut);
+    if (!debut) return false;
     return maintenant.value >= debut;
   }
 
   function peutEtreConfirmee(reservation) {
     if (!reservation || reservation.status !== "en_attente") return false;
-    const debut = new Date(reservation.date_heure_debut);
+    const debut = parseLocalDate(reservation.date_heure_debut);
+    if (!debut) return false;
     return maintenant.value < debut;
   }
 
   return { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee, maintenant };
 }
-
