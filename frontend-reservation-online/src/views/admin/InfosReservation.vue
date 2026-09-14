@@ -592,3 +592,21 @@ const handleTerminate = async () => {
     </div>
   </AppAdmin>
 </template>
+
+<style scoped>
+/* Transition fondue pour le carrousel d'images */
+.img-fade-enter-active,
+.img-fade-leave-active {
+  transition: opacity 0.8s ease;
+  position: absolute;
+  inset: 0;
+}
+.img-fade-enter-from,
+.img-fade-leave-to {
+  opacity: 0;
+}
+.img-fade-enter-to,
+.img-fade-leave-from {
+  opacity: 1;
+}
+</style>
