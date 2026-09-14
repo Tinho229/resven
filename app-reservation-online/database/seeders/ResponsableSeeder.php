@@ -11,10 +11,7 @@ use Illuminate\Support\Facades\Hash;
     public function run(): void
     {
         User::create([
-            'nom' => 'Ro',
-            'email' => 'ro@example.com',
-            'mot_de_passe' => Hash::make('01010101'),
-            'role' => 'responsable',
+            
         ]);
     }
 }

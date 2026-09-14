@@ -135,6 +135,19 @@ const dureHeures = computed(() => {
     return Math.max(0, diff / 1000 / 3600)
 })
 
+// Affichage de la durée : minutes si < 1h, sinon heures
+const dureLabel = computed(() => {
+    if (!debutDateTime.value || !finDateTime.value) return '—'
+    const diff = new Date(finDateTime.value) - new Date(debutDateTime.value)
+    const totalMinutes = Math.round(Math.max(0, diff / 60000))
+    if (totalMinutes <= 0) return '0 min'
+    if (totalMinutes < 60) return `${totalMinutes} min`
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    if (minutes === 0) return `${hours} heure${hours > 1 ? 's' : ''}`
+    return `${hours}h ${minutes}min`
+})
+
 // Équipements déjà sélectionnés
 const selectedEquipementIds = computed(() =>
     selectedEquipements.value.map((e) => e.equipement_id)
@@ -798,7 +811,7 @@ const submitReservation = async () => {
                         <dt class="inline-flex items-center gap-1.5 text-[#777]">
                           <Clock :size="13" /> Durée
                         </dt>
-                        <dd class="text-right font-medium text-[#222]">{{ dureHeures.toFixed(1) }} heure(s)</dd>
+                        <dd class="text-right font-medium text-[#222]">{{ dureLabel }}</dd>
                       </div>
                     </dl>
 
