@@ -399,6 +399,7 @@ const proceedToReservation = () => {
                         <img
                             :src="room.image"
                             :alt="room.name"
+                            decoding="async"
                             class="h-full w-full
                                    object-cover
                                    transition-opacity

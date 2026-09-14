@@ -62,6 +62,12 @@ let interval = null
 */
 
 onMounted(() => {
+    // Préchargement en arrière-plan des images de la section Équipements
+    equipments.forEach((eq) => {
+        const img = new Image()
+        img.src = eq.image
+    })
+
     interval = setInterval(() => {
         activeEquipment.value =
             (activeEquipment.value + 1) % equipments.length
@@ -360,6 +366,7 @@ onBeforeUnmount(() => {
                         :key="activeEquipment"
                         :src="equipments[activeEquipment].image"
                         alt="Équipement disponible"
+                        decoding="async"
                         class="absolute inset-0
                                h-full w-full
                                object-cover"

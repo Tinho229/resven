@@ -248,6 +248,7 @@ const handleVoirTous = () => {
                         <img
                             :src="equipment.image"
                             :alt="equipment.name"
+                            decoding="async"
                             class="h-full w-full
                                    object-cover
                                    transition-transform

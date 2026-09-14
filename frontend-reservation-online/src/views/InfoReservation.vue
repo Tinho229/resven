@@ -110,8 +110,10 @@ const durationText = computed(() => {
   const debut = new Date(reservation.value.date_heure_debut)
   const fin = new Date(reservation.value.date_heure_fin)
   const diffMs = fin - debut
-  if (diffMs <= 0) return '0 h'
+  if (diffMs <= 0) return '0 min'
   const totalMinutes = Math.round(diffMs / 60000)
+  // Moins d'une heure → afficher uniquement en minutes
+  if (totalMinutes < 60) return `${totalMinutes} min`
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
   if (minutes === 0) return `${hours} heure${hours > 1 ? 's' : ''}`
