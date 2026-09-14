@@ -20,10 +20,32 @@ export function useReservationStatut() {
   }
 
   function estTerminee(reservation) {
-    if (!reservation || reservation.status !== "confirmee") return false;
-    const fin = parseLocalDate(reservation.date_heure_fin);
-    if (!fin) return false;
-    return maintenant.value > fin;
+    if (!reservation) return false;
+    if (reservation.status === "terminee") return true;
+    if (reservation.status === "confirmee") {
+      const fin = parseLocalDate(reservation.date_heure_fin);
+      if (!fin) return false;
+      return maintenant.value > fin;
+    }
+    return false;
+  }
+
+  function getStatutEffectif(reservation) {
+    if (!reservation) return "";
+    if (reservation.status === "terminee") return "terminee";
+    if (reservation.status === "rejetee") return "rejetee";
+    if (reservation.status === "annulee") return "annulee";
+    if (reservation.status === "en_attente") {
+      const debut = parseLocalDate(reservation.date_heure_debut);
+      if (debut && maintenant.value >= debut) return "expiree";
+      return "en_attente";
+    }
+    if (reservation.status === "confirmee") {
+      const fin = parseLocalDate(reservation.date_heure_fin);
+      if (fin && maintenant.value > fin) return "terminee";
+      return "confirmee";
+    }
+    return reservation.status;
   }
 
   function tempsRestant(reservation) {
@@ -86,5 +108,5 @@ export function useReservationStatut() {
     return maintenant.value < debut;
   }
 
-  return { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee, maintenant };
+  return { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee, getStatutEffectif, maintenant };
 }

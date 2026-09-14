@@ -16,4 +16,7 @@ export default {
   annuler(id) {
     return axiosClient.patch(`/responsable/reservations/${id}/annuler`);
   },
+  terminer(id) {
+    return axiosClient.patch(`/responsable/reservations/${id}/terminer`);
+  },
 };

@@ -395,14 +395,9 @@ const handleTerminate = async () => {
 
                 <div
                   class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-semibold text-white backdrop-blur-md capitalize"
-                  :class="{
-                    'bg-emerald-500/90': reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) > new Date(),
-                    'bg-amber-500/90': reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) > new Date(),
-                    'bg-slate-700/90': reservation.status === 'terminee' || (reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) <= new Date()),
-                    'bg-rose-500/90': reservation.status === 'rejetee' || (reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date()),
-                  }"
+                  :class="statusInfo.bgClass"
                 >
-                  {{ reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date() ? 'Expirée' : (reservation.status === 'confirmee' && new Date(reservation.date_heure_fin) <= new Date() ? 'Terminée' : reservation.status) }}
+                  {{ statusInfo.label }}
                 </div>
               </div>
             </div>

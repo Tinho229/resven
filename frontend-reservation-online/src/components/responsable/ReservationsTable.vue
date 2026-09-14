@@ -4,7 +4,7 @@ import StatusBadge from "./StatusBadge.vue";
 import ConfirmActionDialog from "./ConfirmActionDialog.vue";
 import DetailsReservationModal from "./DetailsReservationModal.vue";
 import { useReservationStatut } from "@/composables/useReservationStatut";
-import { Phone, Eye, Search, Loader2, ChevronLeft, ChevronRight, Check, X } from "lucide-vue-next";
+import { Phone, Eye, Search, Loader2, ChevronLeft, ChevronRight, Check, X, CheckCheck, Flag } from "lucide-vue-next";
 import { formatDateTime, parseLocalDate } from "@/helpers/dateHelper";
 
 const props = defineProps({
@@ -13,7 +13,7 @@ const props = defineProps({
   showActions: { type: Boolean, default: true },
 });
 
-const emit = defineEmits(["confirmer", "rejeter", "annuler"]);
+const emit = defineEmits(["confirmer", "rejeter", "annuler", "terminer"]);
 
 const { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee } = useReservationStatut();
 
@@ -161,7 +161,7 @@ const reservationsGroupees = computed(() => {
                 <p class="text-xs text-slate-500 mt-0.5">{{ reservation.salle?.nom }}</p>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
-                <StatusBadge :statut="reservation.status" />
+                <StatusBadge :reservation="reservation" :statut="reservation.status" />
                 <button
                   type="button"
                   class="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition"
@@ -181,7 +181,7 @@ const reservationsGroupees = computed(() => {
             </div>
 
             <!-- Badges d'état -->
-            <div class="flex flex-wrap gap-1.5 mb-3" v-if="estEnCours(reservation) || estAVenir(reservation) || estExpiree(reservation)">
+            <div class="flex flex-wrap gap-1.5 mb-3" v-if="estEnCours(reservation) || estAVenir(reservation) || estExpiree(reservation) || estTerminee(reservation)">
               <span v-if="estExpiree(reservation) && reservation.status === 'en_attente'"
                 class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-600 border border-rose-200">
                 Délai expiré
@@ -194,6 +194,11 @@ const reservationsGroupees = computed(() => {
               <span v-if="estAVenir(reservation)"
                 class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-50 text-violet-600 border border-violet-200">
                 {{ tempsAvantDebut(reservation) }}
+              </span>
+              <span v-if="estTerminee(reservation)"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                <CheckCheck class="w-3 h-3" />
+                Terminée
               </span>
             </div>
 
@@ -225,16 +230,29 @@ const reservationsGroupees = computed(() => {
                   Rejeter
                 </button>
               </div>
-              <div v-else-if="reservation.status === 'confirmee' && !estTerminee(reservation)">
+              <div v-else-if="reservation.status === 'confirmee'" class="flex items-center gap-2">
                 <button
+                  v-if="!estTerminee(reservation)"
                   type="button"
                   :disabled="actionLoadingId === reservation.id"
-                  class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
+                  class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 transition"
+                  @click="demanderAction('terminer', reservation)"
+                >
+                  <Loader2 v-if="actionLoadingId === reservation.id" class="w-3.5 h-3.5 animate-spin" />
+                  <Flag v-else class="w-3.5 h-3.5" />
+                  Clôturer
+                </button>
+                <button
+                  v-if="!estTerminee(reservation)"
+                  type="button"
+                  :disabled="actionLoadingId === reservation.id"
+                  class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
                   @click="demanderAction('annuler', reservation)"
                 >
                   <Loader2 v-if="actionLoadingId === reservation.id" class="w-3.5 h-3.5 animate-spin" />
-                  Annuler la réservation
+                  Annuler
                 </button>
+                <span v-else class="text-xs text-slate-400">Événement clôturé</span>
               </div>
             </div>
           </div>
@@ -331,13 +349,22 @@ const reservationsGroupees = computed(() => {
                       Rejeter
                     </button>
                   </div>
-                  <div v-else-if="reservation.status === 'confirmee' && !estTerminee(reservation)" class="flex justify-end">
-                    <button type="button" :disabled="actionLoadingId === reservation.id"
+                  <div v-else-if="reservation.status === 'confirmee'" class="flex items-center justify-end gap-2">
+                    <button v-if="!estTerminee(reservation)" type="button" :disabled="actionLoadingId === reservation.id"
+                      class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 transition"
+                      title="Marquer comme terminée"
+                      @click="demanderAction('terminer', reservation)">
+                      <Loader2 v-if="actionLoadingId === reservation.id" class="w-3.5 h-3.5 animate-spin" />
+                      <Flag v-else class="w-3 h-3" />
+                      Clôturer
+                    </button>
+                    <button v-if="!estTerminee(reservation)" type="button" :disabled="actionLoadingId === reservation.id"
                       class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
                       @click="demanderAction('annuler', reservation)">
                       <Loader2 v-if="actionLoadingId === reservation.id" class="w-3.5 h-3.5 animate-spin" />
                       Annuler
                     </button>
+                    <span v-else class="text-xs text-slate-400">Terminée</span>
                   </div>
                   <span v-else class="text-xs text-slate-400">—</span>
                 </td>
@@ -390,13 +417,15 @@ const reservationsGroupees = computed(() => {
 
     <ConfirmActionDialog
       :open="dialogue.ouvert"
-      :titre="dialogue.action === 'rejeter' ? 'Rejeter la réservation ?' : dialogue.action === 'annuler' ? 'Annuler la réservation ?' : 'Confirmer la réservation ?'"
+      :titre="dialogue.action === 'rejeter' ? 'Rejeter la réservation ?' : dialogue.action === 'annuler' ? 'Annuler la réservation ?' : dialogue.action === 'terminer' ? 'Clôturer la réservation ?' : 'Confirmer la réservation ?'"
       :message="dialogue.action === 'rejeter'
         ? `La demande de ${dialogue.reservation?.nom_demandeur} pour ${dialogue.reservation?.salle?.nom} sera rejetée.`
         : dialogue.action === 'annuler'
           ? `La réservation de ${dialogue.reservation?.nom_demandeur} pour ${dialogue.reservation?.salle?.nom} sera annulée.`
-          : `La demande de ${dialogue.reservation?.nom_demandeur} pour ${dialogue.reservation?.salle?.nom} sera confirmée.`"
-      :label-confirmer="dialogue.action === 'rejeter' ? 'Rejeter' : dialogue.action === 'annuler' ? 'Annuler' : 'Confirmer'"
+          : dialogue.action === 'terminer'
+            ? `La réservation de ${dialogue.reservation?.nom_demandeur} pour ${dialogue.reservation?.salle?.nom} sera clôturée et marquée comme terminée.`
+            : `La demande de ${dialogue.reservation?.nom_demandeur} pour ${dialogue.reservation?.salle?.nom} sera confirmée.`"
+      :label-confirmer="dialogue.action === 'rejeter' ? 'Rejeter' : dialogue.action === 'annuler' ? 'Annuler' : dialogue.action === 'terminer' ? 'Clôturer' : 'Confirmer'"
       :variant="dialogue.action === 'rejeter' || dialogue.action === 'annuler' ? 'danger' : 'primaire'"
       @confirmer="confirmerDialogue"
       @annuler="annulerDialogue"

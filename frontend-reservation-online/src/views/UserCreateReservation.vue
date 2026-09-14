@@ -6,6 +6,7 @@ import Footer from '@/layouts/Footer.vue'
 import { useSallesStore } from '@/store/salles'
 import { useEquipementsStore } from '@/store/equipements'
 import { useReservationsStore } from '@/store/reservations'
+import { toApiDateTime, formatDateTime, parseLocalDate } from '@/helpers/dateHelper'
 import {
     ArrowLeft,
     CheckCircle2,
@@ -113,32 +114,17 @@ const salleCoverUrl = computed(() => {
 const formatPrice = (p) =>
     p != null ? new Intl.NumberFormat('fr-FR').format(p) + ' FCFA' : 'Sur demande'
 
-const formatDateTime = (dt) => {
-    if (!dt) return ''
-    try {
-        return new Intl.DateTimeFormat('fr-FR', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(new Date(dt.replace('T', ' ')))
-    } catch {
-        return dt
-    }
-}
-
 // Durée en heures entre début et fin
 const dureHeures = computed(() => {
     if (!debutDateTime.value || !finDateTime.value) return 0
-    const diff = new Date(finDateTime.value) - new Date(debutDateTime.value)
+    const diff = parseLocalDate(finDateTime.value) - parseLocalDate(debutDateTime.value)
     return Math.max(0, diff / 1000 / 3600)
 })
 
 // Affichage de la durée : minutes si < 1h, sinon heures
 const dureLabel = computed(() => {
     if (!debutDateTime.value || !finDateTime.value) return '—'
-    const diff = new Date(finDateTime.value) - new Date(debutDateTime.value)
+    const diff = parseLocalDate(finDateTime.value) - parseLocalDate(debutDateTime.value)
     const totalMinutes = Math.round(Math.max(0, diff / 60000))
     if (totalMinutes <= 0) return '0 min'
     if (totalMinutes < 60) return `${totalMinutes} min`
@@ -152,10 +138,6 @@ const dureLabel = computed(() => {
 const selectedEquipementIds = computed(() =>
     selectedEquipements.value.map((e) => e.equipement_id)
 )
-
-// ─── Helpers API datetime ───────────────────────────────────────────────────
-const toApiDateTime = (dtLocal) =>
-    dtLocal ? dtLocal.replace('T', ' ') + ':00' : ''
 
 // ─── Step 1 : validation & dispo ───────────────────────────────────────────
 const verifierDisponibilite = async () => {

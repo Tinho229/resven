@@ -180,4 +180,24 @@ class ReservationController extends Controller
             'data' => $reservation->load(['user', 'salle', 'equipements', 'creePar']),
         ]);
     }
+
+    public function terminer(Reservation $reservation): JsonResponse
+    {
+        if ($reservation->status !== 'confirmee') {
+            throw ValidationException::withMessages([
+                'status' => ["Seule une réservation confirmée peut être clôturée (statut actuel : {$reservation->status})."],
+            ]);
+        }
+
+        $reservation->update([
+            'status' => 'terminee',
+            'terminee_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation clôturée et marquée comme terminée avec succès.',
+            'data' => $reservation->load(['user', 'salle.images', 'equipements', 'creePar']),
+        ]);
+    }
 }

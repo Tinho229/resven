@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useResponsableReservationsStore } from "@/store/responsableReservations";
-import { LayoutDashboard, Clock, CheckCircle2, XCircle, LogOut, Building2, Menu, X } from "lucide-vue-next";
+import { LayoutDashboard, Clock, CheckCircle2, CheckCheck, XCircle, LogOut, Building2, Menu, X } from "lucide-vue-next";
 
 const authStore = useAuthStore();
 const store = useResponsableReservationsStore();
@@ -26,6 +26,7 @@ const liens = [
   { nom: "responsable-home", label: "Réservations", icon: LayoutDashboard },
   { nom: "responsable-en-attente", label: "En attente", icon: Clock, compteurCle: "en_attente" },
   { nom: "responsable-confirmees", label: "Confirmées", icon: CheckCircle2, compteurCle: "confirmee" },
+  { nom: "responsable-terminees", label: "Terminées", icon: CheckCheck, compteurCle: "terminee" },
   { nom: "responsable-rejetees", label: "Rejetées", icon: XCircle, compteurCle: "rejetee" },
 ];
 </script>

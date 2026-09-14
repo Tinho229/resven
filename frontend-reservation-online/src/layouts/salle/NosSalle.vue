@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSallesStore } from '@/store/salles'
+import { toApiDateTime } from '@/helpers/dateHelper'
 import {
     Plus,
     MapPin,
@@ -211,8 +212,8 @@ const checkCreneau = async () => {
     dispoResult.value = null
 
     try {
-        const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
-        const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
+        const formattedDebut = toApiDateTime(debutDateTime.value)
+        const formattedFin = toApiDateTime(finDateTime.value)
         const res = await sallesStore.checkDisponibilite(
             selectedSalleForDispo.value.id,
             formattedDebut,

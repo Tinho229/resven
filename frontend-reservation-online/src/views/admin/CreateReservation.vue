@@ -6,6 +6,7 @@ import { useAdminReservationsStore } from '@/store/adminReservations'
 import { useAdminSallesStore } from '@/store/adminSalles'
 import { useAdminUsersStore } from '@/store/adminUsers'
 import { useAdminEquipementsStore } from '@/store/adminEquipements'
+import { toApiDateTime, formatDateTime, parseLocalDate } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   CheckCircle2,
@@ -104,33 +105,15 @@ const salleCoverUrl = computed(() => {
 const formatPrice = (p) =>
   p != null ? new Intl.NumberFormat('fr-FR').format(p) + ' FCFA' : 'Sur demande'
 
-const formatDateTime = (dt) => {
-  if (!dt) return ''
-  try {
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dt.replace('T', ' ')))
-  } catch {
-    return dt
-  }
-}
-
 const dureHeures = computed(() => {
   if (!form.date_heure_debut || !form.date_heure_fin) return 0
-  const diff = new Date(form.date_heure_fin) - new Date(form.date_heure_debut)
+  const diff = parseLocalDate(form.date_heure_fin) - parseLocalDate(form.date_heure_debut)
   return Math.max(0, diff / 1000 / 3600)
 })
 
 const selectedEquipementIds = computed(() =>
   selectedEquipements.value.map((e) => e.equipement_id)
 )
-
-const toApiDateTime = (dtLocal) =>
-  dtLocal ? dtLocal.replace('T', ' ') + ':00' : ''
 
 // Navigation Steps
 const goStep2 = () => {
@@ -143,7 +126,7 @@ const goStep2 = () => {
     step1Error.value = 'Veuillez renseigner les dates et heures de début et de fin.'
     return
   }
-  if (new Date(form.date_heure_debut) >= new Date(form.date_heure_fin)) {
+  if (parseLocalDate(form.date_heure_debut) >= parseLocalDate(form.date_heure_fin)) {
     step1Error.value = 'La date de fin doit être postérieure à la date de début.'
     return
   }

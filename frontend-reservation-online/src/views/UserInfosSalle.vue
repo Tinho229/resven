@@ -4,6 +4,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import NavBar from '@/layouts/NavBar.vue'
 import Footer from '@/layouts/Footer.vue'
 import { useSallesStore } from '@/store/salles'
+import { toApiDateTime } from '@/helpers/dateHelper'
 import {
   ArrowLeft,
   MapPin,
@@ -124,8 +125,8 @@ const checkCreneau = async () => {
   dispoResult.value = null
 
   try {
-    const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
-    const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
+    const formattedDebut = toApiDateTime(debutDateTime.value)
+    const formattedFin = toApiDateTime(finDateTime.value)
 
     const res = await sallesStore.checkDisponibilite(salleId, formattedDebut, formattedFin)
     dispoResult.value = res

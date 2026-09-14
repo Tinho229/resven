@@ -6,6 +6,7 @@ import ResponsableLayout from "@/views/responsable/ResponsableLayout.vue";
 import ReservationsAccueil from "@/views/responsable/ReservationsAccueil.vue";
 import ReservationsEnAttente from "@/views/responsable/ReservationsEnAttente.vue";
 import ReservationsConfirmees from "@/views/responsable/ReservationsConfirmees.vue";
+import ReservationsTerminees from "@/views/responsable/ReservationsTerminees.vue";
 import ReservationsRejetees from "@/views/responsable/ReservationsRejetees.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import CreateSalle from '@/views/admin/CreateSalle.vue'
@@ -290,6 +291,11 @@ const routes = [
         path: "reservations/confirmees",
         name: "responsable-confirmees",
         component: ReservationsConfirmees,
+      },
+      {
+        path: "reservations/terminees",
+        name: "responsable-terminees",
+        component: ReservationsTerminees,
       },
       {
         path: "reservations/rejetees",

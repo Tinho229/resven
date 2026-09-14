@@ -112,6 +112,12 @@ const getStatusBadge = (st, dateDebut, dateFin) => {
   }
 }
 
+// Retourne true si la date est dans le futur (utilise parseLocalDate pour éviter les décalages UTC)
+const isAfterNow = (dateStr) => {
+  const d = parseLocalDate(dateStr)
+  return d ? d > new Date() : false
+}
+
 const handleConfirm = async (id) => {
   try {
     await adminReservationsStore.confirmReservation(id)
@@ -344,7 +350,7 @@ const confirmDelete = async () => {
               <div class="flex items-center gap-1.5">
                 <!-- Validation rapide : Confirmer -->
                 <button
-                  v-if="res.status === 'en_attente' && new Date(res.date_heure_debut) > new Date()"
+                  v-if="res.status === 'en_attente' && isAfterNow(res.date_heure_debut)"
                   type="button"
                   title="Confirmer"
                   class="flex h-8 items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 cursor-pointer"
@@ -356,7 +362,7 @@ const confirmDelete = async () => {
 
                 <!-- Validation rapide : Clôturer -->
                 <button
-                  v-if="res.status === 'confirmee' && new Date(res.date_heure_fin) > new Date()"
+                  v-if="res.status === 'confirmee' && isAfterNow(res.date_heure_fin)"
                   type="button"
                   title="Terminée"
                   class="flex h-8 items-center gap-1 rounded-lg border border-slate-300 bg-slate-50 px-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
@@ -457,7 +463,7 @@ const confirmDelete = async () => {
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Validation rapide : Confirmer -->
                     <button
-                      v-if="res.status === 'en_attente' && new Date(res.date_heure_debut) > new Date()"
+                      v-if="res.status === 'en_attente' && isAfterNow(res.date_heure_debut)"
                       type="button"
                       title="Confirmer la réservation"
                       class="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-200 text-emerald-600 transition hover:bg-emerald-50 cursor-pointer"
@@ -468,7 +474,7 @@ const confirmDelete = async () => {
 
                     <!-- Validation rapide : Clôturer -->
                     <button
-                      v-if="res.status === 'confirmee' && new Date(res.date_heure_fin) > new Date()"
+                      v-if="res.status === 'confirmee' && isAfterNow(res.date_heure_fin)"
                       type="button"
                       title="Marquer terminée"
                       class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition hover:bg-slate-100 cursor-pointer"
