@@ -10,8 +10,10 @@ async function gererConfirmation(id) {
   try {
     await store.confirmer(id);
     toast.success("Réservation confirmée avec succès.");
-  } catch {
-    toast.error("Impossible de confirmer cette réservation.");
+  } catch (error) {
+    const msg = error?.response?.data?.message || store.errorMessage || "Impossible de confirmer cette réservation.";
+    toast.error(msg);
+    await store.fetchAll();
   }
 }
 

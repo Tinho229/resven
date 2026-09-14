@@ -21,6 +21,8 @@ class DashboardController extends Controller
     public function index(): JsonResponse
     {
         try {
+            Reservation::rejeterReservationsExpirees();
+
             // 1. Statistiques globales (cartes du haut)
             $totalUtilisateurs = User::where('role', 'user')->count();
             $totalResponsables = User::where('role', 'responsable')->count();

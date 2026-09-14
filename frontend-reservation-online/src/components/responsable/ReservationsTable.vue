@@ -23,7 +23,7 @@ const props = defineProps({
 
 const emit = defineEmits(["confirmer", "rejeter", "annuler"]);
 
-const { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut } = useReservationStatut();
+const { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee } = useReservationStatut();
 
 // Recherche
 const recherche = ref("");
@@ -176,6 +176,10 @@ const reservationsGroupees = computed(() => {
             <td class="px-4 py-3">
               <div class="flex items-center gap-2">
                 <StatusBadge :statut="reservation.status" />
+                <span v-if="reservation.status === 'en_attente' && estExpiree(reservation)"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-600 border border-rose-200">
+                  Délai expiré
+                </span>
                 <span v-if="estEnCours(reservation)"
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-600 text-white">
                   <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -198,13 +202,16 @@ const reservationsGroupees = computed(() => {
               </button>
             </td>
             <td v-if="showActions" class="px-4 py-3 text-right">
-              <div v-if="reservation.status === 'en_attente'" class="flex justify-end gap-2">
-                <button type="button" :disabled="actionLoadingId === reservation.id"
+              <div v-if="reservation.status === 'en_attente'" class="flex items-center justify-end gap-2">
+                <button v-if="peutEtreConfirmee(reservation)" type="button" :disabled="actionLoadingId === reservation.id"
                   class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
                   @click="demanderAction('confirmer', reservation)">
                   <Loader2 v-if="actionLoadingId === reservation.id" class="w-3.5 h-3.5 animate-spin" />
                   Confirmer
                 </button>
+                <span v-else class="text-[11px] font-medium text-rose-600 px-2 py-1 bg-rose-50 rounded border border-rose-200">
+                  Expirée (non confirmable)
+                </span>
                 <button type="button" :disabled="actionLoadingId === reservation.id"
                   class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
                   @click="demanderAction('rejeter', reservation)">

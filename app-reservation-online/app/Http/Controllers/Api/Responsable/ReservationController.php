@@ -15,6 +15,8 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        Reservation::rejeterReservationsExpirees();
+
         $reservations = Reservation::with(['user', 'salle.images', 'equipements', 'creePar'])
             ->latest()
             ->get();
@@ -117,6 +119,13 @@ class ReservationController extends Controller
     {
         $this->verifierStatutModifiable($reservation);
 
+        if ($reservation->isExpired()) {
+            $reservation->update(['status' => 'rejetee']);
+            throw ValidationException::withMessages([
+                'status' => ["Impossible de confirmer cette réservation : son délai est expiré (date de début dépassée). Elle a été automatiquement rejetée."],
+            ]);
+        }
+
         $reservation->update(['status' => 'confirmee']);
 
         return response()->json([
@@ -141,6 +150,13 @@ class ReservationController extends Controller
 
     private function verifierStatutModifiable(Reservation $reservation): void
     {
+        if ($reservation->status === 'en_attente' && $reservation->isExpired()) {
+            $reservation->update(['status' => 'rejetee']);
+            throw ValidationException::withMessages([
+                'status' => ["Impossible de modifier cette réservation : son délai est expiré (date de début dépassée). Elle a été automatiquement rejetée."],
+            ]);
+        }
+
         if ($reservation->status !== 'en_attente') {
             throw ValidationException::withMessages([
                 'status' => ["Cette réservation a déjà le statut '{$reservation->status}', elle ne peut plus être modifiée."],

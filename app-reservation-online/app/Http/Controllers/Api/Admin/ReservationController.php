@@ -23,6 +23,8 @@ class ReservationController extends Controller
     public function index(Request $request): JsonResponse|AnonymousResourceCollection
     {
         try {
+            Reservation::rejeterReservationsExpirees();
+
             $query = Reservation::query()
                 ->with(['salle', 'user', 'createur', 'equipements'])
                 ->latest('date_heure_debut');
@@ -215,6 +217,8 @@ class ReservationController extends Controller
     public function show(string $id): JsonResponse
     {
         try {
+            Reservation::rejeterReservationsExpirees();
+
             $reservation = Reservation::with(['salle', 'user', 'createur', 'equipements'])->find($id);
 
             if (!$reservation) {
@@ -262,6 +266,18 @@ class ReservationController extends Controller
             return response()->json([
                 'message' => 'La salle sélectionnée est introuvable.',
             ], 404);
+        }
+
+        // Vérification du statut demandé : interdire confirmation si expirée
+        if (isset($validated['status']) && $validated['status'] === 'confirmee') {
+            if ($reservation->isExpired() || \Carbon\Carbon::parse($debut)->isPast()) {
+                return response()->json([
+                    'message' => "Impossible de confirmer : le délai de réservation a expiré (la date de début est dépassée).",
+                    'errors' => [
+                        'status' => ["Impossible de confirmer une réservation dont la date de début est passée."],
+                    ],
+                ], 422);
+            }
         }
 
         // Vérification du statut de la salle
@@ -376,6 +392,24 @@ class ReservationController extends Controller
                 return response()->json([
                     'message' => 'Réservation introuvable.',
                 ], 404);
+            }
+
+            // Vérification de l'expiration du délai
+            if ($reservation->isExpired()) {
+                if ($reservation->status === 'en_attente') {
+                    $reservation->status = 'rejetee';
+                    $reservation->save();
+                }
+                return response()->json([
+                    'message' => "Impossible de confirmer cette réservation : son délai est expiré (la date de début est déjà passée). Son statut est passé à 'rejeté'.",
+                ], 422);
+            }
+
+            // Vérification que la réservation est bien en attente
+            if ($reservation->status !== 'en_attente') {
+                return response()->json([
+                    'message' => "Impossible de confirmer : cette réservation a déjà le statut '{$reservation->status}' et ne peut plus être modifiée.",
+                ], 422);
             }
 
             // Vérification de la disponibilité de la salle

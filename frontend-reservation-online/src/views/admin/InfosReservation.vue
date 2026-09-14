@@ -77,6 +77,7 @@ const handleConfirm = async () => {
     await loadDetails()
   } catch (e) {
     console.error('Erreur confirmation :', e)
+    await loadDetails()
   }
 }
 
@@ -115,7 +116,7 @@ const handleTerminate = async () => {
         <div v-if="reservation" class="flex flex-wrap items-center gap-2">
           <!-- Confirmer -->
           <button
-            v-if="reservation.status === 'en_attente'"
+            v-if="reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) > new Date()"
             type="button"
             class="inline-flex items-center gap-1.5 rounded-[8px] bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 active:scale-95"
             @click="handleConfirm"
@@ -123,6 +124,12 @@ const handleTerminate = async () => {
             <Check :size="14" />
             <span>Confirmer</span>
           </button>
+          <span
+            v-else-if="reservation.status === 'en_attente'"
+            class="inline-flex items-center gap-1.5 rounded-[8px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600"
+          >
+            Délai expiré (non confirmable)
+          </span>
 
           <!-- Clôturer -->
           <button
@@ -221,12 +228,12 @@ const handleTerminate = async () => {
                   class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-semibold text-white backdrop-blur-md capitalize"
                   :class="{
                     'bg-emerald-500/90': reservation.status === 'confirmee',
-                    'bg-amber-500/90': reservation.status === 'en_attente',
+                    'bg-amber-500/90': reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) > new Date(),
                     'bg-slate-700/90': reservation.status === 'terminee',
-                    'bg-rose-500/90': reservation.status === 'rejetee',
+                    'bg-rose-500/90': reservation.status === 'rejetee' || (reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date()),
                   }"
                 >
-                  {{ reservation.status }}
+                  {{ reservation.status === 'en_attente' && new Date(reservation.date_heure_debut) <= new Date() ? 'Expirée' : reservation.status }}
                 </div>
               </div>
             </div>

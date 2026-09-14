@@ -15,6 +15,8 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        Reservation::rejeterReservationsExpirees();
+
         $reservations = Reservation::with(['salle.images', 'equipements'])
             ->where('user_id', $request->user()->id)
             ->latest()
@@ -28,6 +30,9 @@ class ReservationController extends Controller
 
     public function show(Request $request, Reservation $reservation): JsonResponse
     {
+        Reservation::rejeterReservationsExpirees();
+        $reservation->refresh();
+
         if ($reservation->user_id !== $request->user()->id) {
             return response()->json([
                 'success' => false,
@@ -167,6 +172,15 @@ class ReservationController extends Controller
             ], 403);
         }
 
+        if ($reservation->isExpired()) {
+            if ($reservation->status === 'en_attente') {
+                $reservation->update(['status' => 'rejetee']);
+            }
+            throw ValidationException::withMessages([
+                'status' => ["Cette réservation a expiré (date de début dépassée) et ne peut plus être modifiée."],
+            ]);
+        }
+
         if (!in_array($reservation->status, ['en_attente', 'confirmee'])) {
             throw ValidationException::withMessages([
                 'status' => ["Cette réservation ne peut plus être modifiée (statut actuel : {$reservation->status})."],
@@ -263,6 +277,15 @@ class ReservationController extends Controller
     {
         if ($reservation->user_id !== $request->user()->id) {
             abort(403, 'Vous ne pouvez annuler que vos propres réservations.');
+        }
+
+        if ($reservation->isExpired()) {
+            if ($reservation->status === 'en_attente') {
+                $reservation->update(['status' => 'rejetee']);
+            }
+            throw ValidationException::withMessages([
+                'status' => ["Cette réservation a expiré (date de début dépassée) et ne peut plus être annulée."],
+            ]);
         }
 
         if (!in_array($reservation->status, ['en_attente', 'confirmee'])) {

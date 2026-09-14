@@ -63,5 +63,19 @@ export function useReservationStatut() {
     return `Dans ${minutes} min`;
   }
 
-  return { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut };
+  function estExpiree(reservation) {
+    if (!reservation) return false;
+    if (reservation.status === "rejetee") return true;
+    const debut = new Date(reservation.date_heure_debut);
+    return maintenant.value >= debut;
+  }
+
+  function peutEtreConfirmee(reservation) {
+    if (!reservation || reservation.status !== "en_attente") return false;
+    const debut = new Date(reservation.date_heure_debut);
+    return maintenant.value < debut;
+  }
+
+  return { estEnCours, estTerminee, estAVenir, tempsRestant, tempsAvantDebut, estExpiree, peutEtreConfirmee, maintenant };
 }
+

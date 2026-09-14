@@ -168,4 +168,23 @@ class Reservation extends Model
             ->where('date_heure_fin', '>', $debut)
             ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId));
     }
+
+    /**
+     * Rejette automatiquement toutes les réservations en attente dont le délai a expiré (date_heure_debut <= now()).
+     */
+    public static function rejeterReservationsExpirees(): int
+    {
+        return static::where('status', 'en_attente')
+            ->where('date_heure_debut', '<=', now())
+            ->update(['status' => 'rejetee']);
+    }
+
+    /**
+     * Vérifie si la date de début de la réservation est passée.
+     */
+    public function isExpired(): bool
+    {
+        return $this->date_heure_debut && $this->date_heure_debut->isPast();
+    }
 }
+

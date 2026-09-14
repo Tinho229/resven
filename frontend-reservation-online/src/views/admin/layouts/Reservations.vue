@@ -95,11 +95,14 @@ const formatDateTime = (dateString) => {
   }
 }
 
-const getStatusBadge = (st) => {
+const getStatusBadge = (st, dateDebut) => {
   switch (st) {
     case 'confirmee':
       return { label: 'Confirmée', class: 'bg-emerald-100 text-emerald-700' }
     case 'en_attente':
+      if (dateDebut && new Date(dateDebut) <= new Date()) {
+        return { label: 'Expirée (Rejetée)', class: 'bg-rose-100 text-rose-700' }
+      }
       return { label: 'En attente', class: 'bg-amber-100 text-amber-700' }
     case 'terminee':
       return { label: 'Terminée', class: 'bg-slate-100 text-slate-700' }
@@ -116,6 +119,7 @@ const handleConfirm = async (id) => {
     await loadReservations()
   } catch (e) {
     console.error('Erreur confirmation :', e)
+    await loadReservations()
   }
 }
 
@@ -347,9 +351,9 @@ const confirmDelete = async () => {
               <td class="py-3.5 px-4">
                 <span
                   class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                  :class="getStatusBadge(res.status).class"
+                  :class="getStatusBadge(res.status, res.date_heure_debut).class"
                 >
-                  • {{ getStatusBadge(res.status).label }}
+                  • {{ getStatusBadge(res.status, res.date_heure_debut).label }}
                 </span>
               </td>
 
@@ -358,7 +362,7 @@ const confirmDelete = async () => {
                 <div class="flex items-center justify-end gap-1.5">
                   <!-- Validation rapide : Confirmer -->
                   <button
-                    v-if="res.status === 'en_attente'"
+                    v-if="res.status === 'en_attente' && new Date(res.date_heure_debut) > new Date()"
                     type="button"
                     title="Confirmer la réservation"
                     class="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-200 text-emerald-600 transition hover:bg-emerald-50 cursor-pointer"
