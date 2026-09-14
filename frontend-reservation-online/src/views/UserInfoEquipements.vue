@@ -73,7 +73,7 @@ const handleReserver = () => {
     <div class="min-h-[80vh] bg-[#f6f6f4] text-[#151515]">
         <NavBar />
 
-        <main class="px-4 py-10 sm:px-6 lg:px-10">
+        <div class="px-4 py-10 sm:px-6 lg:px-10">
             <div class="mx-auto max-w-[1180px]">
 
 
@@ -123,7 +123,7 @@ const handleReserver = () => {
                                         <span>Fiche Matériel</span>
                                     </div>
 
-                                  
+
                                 </div>
 
                                 <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
@@ -237,7 +237,7 @@ const handleReserver = () => {
                     </section>
                 </div>
             </div>
-        </main>
+        </div>
 
         <Footer />
     </div>
