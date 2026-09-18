@@ -91,7 +91,7 @@ const handleRegister = async () => {
             type="text"
             required
             autocomplete="name"
-            placeholder="Jean Dupont"
+            placeholder="Hope NT"
             class="h-[42px] w-full rounded-[8px] border border-[#c9c9c9] bg-white px-3.5 text-[14px] outline-none transition focus:border-black focus:ring-1 focus:ring-black"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': authStore.errors.nom }"
           />
@@ -114,7 +114,7 @@ const handleRegister = async () => {
             type="email"
             required
             autocomplete="email"
-            placeholder="votre.email@exemple.com"
+            placeholder="triniteog@gmail.com"
             class="h-[42px] w-full rounded-[8px] border border-[#c9c9c9] bg-white px-3.5 text-[14px] outline-none transition focus:border-black focus:ring-1 focus:ring-black"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': authStore.errors.email }"
           />
