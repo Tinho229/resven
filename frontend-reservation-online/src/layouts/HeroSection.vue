@@ -10,7 +10,7 @@ import { ArrowUpRight, Play, Pause, X } from 'lucide-vue-next'
 |--------------------------------------------------------------------------
 */
 
-const heroImage = '/images/hero/salle-principale.png'
+const heroImage = '/images/hero/salle-principale.jpg'
 
 /*
 |--------------------------------------------------------------------------

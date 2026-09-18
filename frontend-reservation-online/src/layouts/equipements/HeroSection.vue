@@ -25,7 +25,7 @@ const heroImage = '/images/hero/equipements/equipement.png'
 const previewImages = [
     '/images/hero/equipements/equipement-1.png',
     '/images/hero/equipements/equipement-2.png',
-    '/images/hero/equipements/equipement-3.png'
+    '/images/hero/equipements/equipement-4.png'
 
 ]
 
